@@ -40,3 +40,68 @@ let message = MessageType::Text(text::Text {
 });
 
 let response = config.outgoing(message).await;
+
+
+```
+
+
+
+The following example demonstrates how to process incoming WhatsApp messages from webhooks using the WhatsApp handler. The payload is received from WhatsApp, and the code processes it to extract relevant message information.
+
+### Code:
+
+```rust
+let config = Config::from(
+    "https://graph.facebook.com".to_string(),
+    "v16.0".to_string(),
+    "your-business-id".to_string(),
+    "your-phone-id".to_string(),
+    "your-token".to_string(),
+);
+
+let webhook_payload = r#"{
+    "object": "whatsapp",
+    "entry": [
+        {
+            "id": "your-entry-id",
+            "changes": [
+                {
+                    "value": {
+                        "messaging_product": "whatsapp",
+                        "contacts": [
+                            {
+                                "profile": {"name": "John Doe"},
+                                "wa_id": "recipient-id"
+                            }
+                        ],
+                        "messages": [
+                            {
+                                "from": "recipient-id",
+                                "id": "message-id",
+                                "timestamp": "timestamp",
+                                "text": {
+                                    "body": "Hello, this is a test message."
+                                }
+                            }
+                        ]
+                    },
+                    "field": "messages"
+                }
+            ]
+        }
+    ]
+}"#;
+
+match config.incoming_message(webhook_payload) {
+    Ok((messages, _)) => {
+        for message in messages {
+            // Process each message as needed
+            println!("Incoming message: {:?}", message);
+        }
+    }
+    Err(e) => {
+        eprintln!("Error processing incoming message: {}", e);
+    }
+}
+
+```
