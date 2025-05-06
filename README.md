@@ -1,4 +1,4 @@
-# WhatsApp Handler - A Robust Integration for WhatsApp API Communication
+# WhatsApp Handler - A Simple Integration for WhatsApp Cloud API Communication
 
 The **WhatsApp Handler** is a comprehensive library designed to simplify communication between your application and the WhatsApp API. With this handler, you can easily manage incoming and outgoing messages, handle multimedia files, and process message statuses, all while maintaining clean and organized code. Built with flexibility in mind, it supports multiple message formats, including text, images, videos, documents, audio, and interactive messages like buttons and lists.
 
