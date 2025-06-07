@@ -1,5 +1,11 @@
 # WhatsApp Handler
 
+[![Crates.io](https://img.shields.io/crates/v/whatsapp_handler.svg)](https://crates.io/crates/whatsapp_handler)
+[![Docs.rs](https://docs.rs/whatsapp-handler/badge.svg)](https://docs.rs/whatsapp-handler)
+[![License](https://img.shields.io/crates/l/whatsapp_handler.svg)](https://github.com/bambby-plus/whatsapp_handler/blob/main/LICENSE)
+[![Repository](https://img.shields.io/badge/github-bambby--plus%2Fwhatsapp__handler-blue?logo=github)](https://github.com/bambby-plus/whatsapp_handler.git)
+
+
 A Rust library for handling WhatsApp Business API operations, including sending messages and processing incoming webhooks.
 
 ## Installation
