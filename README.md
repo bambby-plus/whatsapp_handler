@@ -1,107 +1,350 @@
-# WhatsApp Handler - A Simple Integration for WhatsApp Cloud API Communication
+# WhatsApp Handler
 
-The **WhatsApp Handler** is a comprehensive library designed to simplify communication between your application and the WhatsApp API. With this handler, you can easily manage incoming and outgoing messages, handle multimedia files, and process message statuses, all while maintaining clean and organized code. Built with flexibility in mind, it supports multiple message formats, including text, images, videos, documents, audio, and interactive messages like buttons and lists.
+A Rust library for handling WhatsApp Business API operations, including sending messages and processing incoming webhooks.
 
-## Key Features:
-- **Configuration Management**: Easily manage WhatsApp API credentials and configuration details (e.g., base URL, business ID, phone number ID, and system user token).
-- **Incoming Message Handling**: Seamlessly process incoming messages from WhatsApp using webhooks, including structured payloads for text and media content.
-- **Interactive Messaging**: Send rich, interactive messages with buttons and lists, providing a dynamic and engaging user experience.
-- **Outgoing Message Support**: Efficiently send various message types, such as text, images, videos, audio, stickers, and documents, to recipients through the WhatsApp API.
-- **Status Updates**: Track and process message status updates, ensuring you have full visibility of message deliveries, read receipts, and more.
-- **Data Safety**: Supports robust error handling and validation, ensuring safe communication and message integrity.
+## Installation
 
-## Modules & Components:
-1. **Config Struct**: Manages WhatsApp API configuration details, including the base URL, version, business ID, and system token.
-2. **Message Types**: Handles multiple message formats like text, image, video, audio, document, and interactive types (buttons and lists).
-3. **Status Handling**: Offers a structured way to manage and process incoming status updates for messages, including delivery and read statuses.
-4. **Interactive Elements**: Integrates interactive message formats, such as buttons and lists, for better user engagement.
+Add this to your `Cargo.toml`:
 
-## Usage Example:
-Here’s how you can use the `WhatsApp Handler` to send a text message:
-
-```rust
-let config = Config::from(
-    "https://graph.facebook.com".to_string(),
-    "v16.0".to_string(),
-    "your-business-id".to_string(),
-    "your-phone-id".to_string(),
-    "your-token".to_string(),
-);
-
-let message = MessageType::Text(text::Text {
-    to: "recipient-id".to_string(),
-    messaging_product: "whatsapp".to_string(),
-    recipient_type: "individual".to_string(),
-    r#type: text::MType::text,
-    text: text::Content {
-        preview_url: false,
-        body: "Hello, World!".to_string(),
-    },
-});
-
-let response = config.outgoing(message).await;
-
-
+```toml
+[dependencies]
+whatsapp_handler = "0.1.0"
+tokio = { version = "1.0", features = ["full"] }
 ```
 
+## Quick Start
 
-
-The following example demonstrates how to process incoming WhatsApp messages from webhooks using the WhatsApp handler. The payload is received from WhatsApp, and the code processes it to extract relevant message information.
-
-### Code:
+### Basic Setup
 
 ```rust
-let config = Config::from(
-    "https://graph.facebook.com".to_string(),
-    "v16.0".to_string(),
-    "your-business-id".to_string(),
-    "your-phone-id".to_string(),
-    "your-token".to_string(),
-);
+use whatsapp_handler::config::Config;
 
-let webhook_payload = r#"{
-    "object": "whatsapp",
-    "entry": [
-        {
-            "id": "your-entry-id",
-            "changes": [
-                {
-                    "value": {
-                        "messaging_product": "whatsapp",
-                        "contacts": [
-                            {
-                                "profile": {"name": "John Doe"},
-                                "wa_id": "recipient-id"
+#[tokio::main]
+async fn main() {
+    let config = Config::from(
+        "https://graph.facebook.com".to_string(),    // WhatsApp base URL
+        "v17.0".to_string(),                         // API version
+        "your_business_id".to_string(),              // WhatsApp Business ID
+        "your_phone_number_id".to_string(),          // Phone Number ID
+        "your_access_token".to_string(),             // System User Token
+    );
+}
+```
+
+## Sending Messages
+
+### 1. Send Text Message
+
+```rust
+use whatsapp_handler::{
+    config::Config,
+    formatter::outgoing_type::{
+        MessageType,
+        text::{Content, MType, Text}
+    }
+};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::from(
+        "https://graph.facebook.com".to_string(),
+        "v17.0".to_string(),
+        "your_business_id".to_string(),
+        "your_phone_number_id".to_string(),
+        "your_access_token".to_string(),
+    );
+
+    let message = Text {
+        to: "1234567890".to_string(),
+        messaging_product: "whatsapp".to_string(),
+        recipient_type: "individual".to_string(),
+        r#type: MType::text,
+        text: Content {
+            preview_url: false,
+            body: "Hello! This is a message from Rust 🦀".to_string(),
+        },
+    };
+
+    let response = config.outgoing(MessageType::Text(message)).await?;
+    println!("Message sent: {:?}", response);
+    
+    Ok(())
+}
+```
+
+### 2. Send Interactive List Message
+
+```rust
+use whatsapp_handler::{
+    config::Config,
+    formatter::outgoing_type::{
+        MessageType,
+        interactive_list::{
+            Action, Body, Footer, Header, InteractiveList, List, MType, Row, Section,
+        }
+    }
+};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::from(
+        "https://graph.facebook.com".to_string(),
+        "v17.0".to_string(),
+        "your_business_id".to_string(),
+        "your_phone_number_id".to_string(),
+        "your_access_token".to_string(),
+    );
+
+    let message = InteractiveList {
+        to: "1234567890".to_string(),
+        messaging_product: "whatsapp".to_string(),
+        recipient_type: "individual".to_string(),
+        r#type: MType::interactive,
+        interactive: List {
+            r#type: "list".to_string(),
+            header: Header {
+                r#type: "text".to_string(),
+                text: "Choose a Service".to_string(),
+            },
+            body: Body {
+                text: "Please select one of the following options:".to_string(),
+            },
+            footer: Footer {
+                text: "Powered by Rust".to_string(),
+            },
+            action: Action {
+                button: "View Options".to_string(),
+                sections: vec![
+                    Section {
+                        title: "Services".to_string(),
+                        rows: vec![
+                            Row {
+                                id: "support".to_string(),
+                                title: "Customer Support".to_string(),
+                                description: "Get help with your account".to_string(),
+                            },
+                            Row {
+                                id: "billing".to_string(),
+                                title: "Billing".to_string(),
+                                description: "View your billing information".to_string(),
+                            },
+                        ],
+                    },
+                    Section {
+                        title: "Information".to_string(),
+                        rows: vec![
+                            Row {
+                                id: "about".to_string(),
+                                title: "About Us".to_string(),
+                                description: "Learn more about our company".to_string(),
                             }
                         ],
-                        "messages": [
-                            {
-                                "from": "recipient-id",
-                                "id": "message-id",
-                                "timestamp": "timestamp",
-                                "text": {
-                                    "body": "Hello, this is a test message."
-                                }
-                            }
-                        ]
                     },
-                    "field": "messages"
-                }
-            ]
-        }
-    ]
-}"#;
+                ],
+            },
+        },
+    };
 
-match config.incoming_message(webhook_payload) {
-    Ok((messages, _)) => {
-        for message in messages {
-            // Process each message as needed
-            println!("Incoming message: {:?}", message);
-        }
-    }
-    Err(e) => {
-        eprintln!("Error processing incoming message: {}", e);
-    }
+    let response = config.outgoing(MessageType::InteractiveList(message)).await?;
+    println!("Interactive list sent: {:?}", response);
+    
+    Ok(())
 }
-
 ```
+
+## Processing Incoming Messages
+
+### Handle Incoming Text Messages
+
+```rust
+use whatsapp_handler::config::Config;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::from(
+        "https://graph.facebook.com".to_string(),
+        "v17.0".to_string(),
+        "your_business_id".to_string(),
+        "your_phone_number_id".to_string(),
+        "your_access_token".to_string(),
+    );
+
+    // Example webhook payload from WhatsApp
+    let webhook_payload = r#"
+    {
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+                "id": "your_business_id",
+                "changes": [
+                    {
+                        "value": {
+                            "messaging_product": "whatsapp",
+                            "metadata": {
+                                "display_phone_number": "1234567890",
+                                "phone_number_id": "your_phone_number_id"
+                            },
+                            "contacts": [
+                                {
+                                    "profile": {
+                                        "name": "John Doe"
+                                    },
+                                    "wa_id": "1234567890"
+                                }
+                            ],
+                            "messages": [
+                                {
+                                    "from": "1234567890",
+                                    "id": "wamid.unique_id",
+                                    "timestamp": "1234567890",
+                                    "text": {
+                                        "body": "Hello there!"
+                                    },
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "field": "messages"
+                    }
+                ]
+            }
+        ]
+    }
+    "#;
+
+    let messages = config.incoming_message(webhook_payload);
+    println!("Received messages: {:?}", messages);
+    
+    Ok(())
+}
+```
+
+### Handle Message Status Updates
+
+```rust
+use whatsapp_handler::config::Config;
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::from(
+        "https://graph.facebook.com".to_string(),
+        "v17.0".to_string(),
+        "your_business_id".to_string(),
+        "your_phone_number_id".to_string(),
+        "your_access_token".to_string(),
+    );
+
+    // Example status webhook payload
+    let status_payload = r#"
+    {
+        "object": "whatsapp_business_account",
+        "entry": [
+            {
+                "id": "your_business_id",
+                "changes": [
+                    {
+                        "value": {
+                            "messaging_product": "whatsapp",
+                            "metadata": {
+                                "display_phone_number": "1234567890",
+                                "phone_number_id": "your_phone_number_id"
+                            },
+                            "statuses": [
+                                {
+                                    "id": "wamid.unique_id",
+                                    "status": "delivered",
+                                    "timestamp": "1234567890",
+                                    "recipient_id": "1234567890"
+                                }
+                            ]
+                        },
+                        "field": "messages"
+                    }
+                ]
+            }
+        ]
+    }
+    "#;
+
+    let statuses = config.incoming_statuses(status_payload);
+    println!("Message statuses: {:?}", statuses);
+    
+    Ok(())
+}
+```
+
+## Complete Example: Echo Bot
+
+```rust
+use whatsapp_handler::{
+    config::Config,
+    formatter::outgoing_type::{
+        MessageType,
+        text::{Content, MType, Text}
+    }
+};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::from(
+        "https://graph.facebook.com".to_string(),
+        "v17.0".to_string(),
+        std::env::var("WHATSAPP_BUSINESS_ID")?,
+        std::env::var("WHATSAPP_PHONE_NUMBER_ID")?,
+        std::env::var("WHATSAPP_ACCESS_TOKEN")?,
+    );
+
+    // Simulate receiving a message
+    let webhook_payload = r#"..."#; // Your webhook payload here
+    
+    let messages = config.incoming_message(webhook_payload);
+    
+    // Echo back received messages
+    if let Ok(parsed_messages) = messages {
+        for message in parsed_messages {
+            let echo_message = Text {
+                to: message.from, // Send back to sender
+                messaging_product: "whatsapp".to_string(),
+                recipient_type: "individual".to_string(),
+                r#type: MType::text,
+                text: Content {
+                    preview_url: false,
+                    body: format!("Echo: {}", message.text.body),
+                },
+            };
+
+            let response = config.outgoing(MessageType::Text(echo_message)).await?;
+            println!("Echo sent: {:?}", response);
+        }
+    }
+    
+    Ok(())
+}
+```
+
+## Environment Variables
+
+For production usage, store your credentials as environment variables:
+
+```bash
+export WHATSAPP_BUSINESS_ID="your_business_id"
+export WHATSAPP_PHONE_NUMBER_ID="your_phone_number_id"
+export WHATSAPP_ACCESS_TOKEN="your_access_token"
+```
+
+## Features
+
+- ✅ Send text messages
+- ✅ Send interactive list messages
+- ✅ Process incoming messages
+- ✅ Handle message status updates
+- ✅ Async/await support
+- ✅ Type-safe message handling
+
+## License
+
+This project is licensed under the MIT License.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
