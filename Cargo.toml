@@ -7,13 +7,13 @@ description = "A comprehensive Rust library for WhatsApp Cloud API integration, 
 license = "MIT"
 repository = "https://github.com/bambby-plus/whatsapp_handler.git"
 # homepage = "https://github.com/bambby-plus/whatsapp_handler.git"
-documentation = "https://docs.rs/whatsapp_handler/latest/whatsapp_handler/"
+documentation = "https://docs.rs/whatsapp_handler"
 readme = "README.md"
 keywords = ["whatsapp", "cloud", "webhook", "handler", "messaging"]
 categories = ["api-bindings", "parsing"]
 
 [dependencies]
-reqwest = { version = "0.12.15", features = ["json"] }
+reqwest = { version = "0.12.19", features = ["json"] }
 serde = { version = "1.0.219", features = ["derive"] }
-tokio = { version = "1.45.0", features = ["full"] }
+tokio = { version = "1.45.1", features = ["full"] }
 serde_json = "1.0.140"
