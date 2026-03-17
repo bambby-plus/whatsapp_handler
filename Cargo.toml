@@ -1,9 +1,9 @@
 [package]
 name = "whatsapp_handler"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
 authors = ["bambby <https://www.linkedin.com/in/bambby-plus/>"]
-description = "A comprehensive Rust library for WhatsApp Cloud API integration, enabling seamless processing of webhook messages and sending of diverse message types, such as documents, images, videos, and interactive messages."
+description = "A comprehensive Rust library for WhatsApp Cloud API integration, enabling seamless processing of webhook messages and sending of diverse message types, such as documents, images, videos, interactive messages, and business templates."
 license = "MIT"
 repository = "https://github.com/bambby-plus/whatsapp_handler.git"
 # homepage = "https://github.com/bambby-plus/whatsapp_handler.git"

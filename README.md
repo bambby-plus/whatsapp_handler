@@ -14,7 +14,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [dependencies]
-whatsapp_handler = "0.1.0"
+whatsapp_handler = "0.2.0"
 tokio = { version = "1.0", features = ["full"] }
 ```
 
@@ -153,6 +153,71 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = config.outgoing(MessageType::InteractiveList(message)).await?;
     println!("Interactive list sent: {:?}", response);
+    
+    Ok(())
+}
+```
+
+### 3. Send Template Message (OTP Verification)
+
+```rust
+use whatsapp_handler::{
+    config::Config,
+    formatter::outgoing_type::{
+        MessageType,
+        template::{
+            Component, Language, MType, Parameter, Template, TemplateContent, TextParameter,
+        }
+    }
+};
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let config = Config::from(
+        "https://graph.facebook.com".to_string(),
+        "v22.0".to_string(),
+        "your_business_id".to_string(),
+        "your_phone_number_id".to_string(),
+        "your_access_token".to_string(),
+    );
+
+    let message = Template {
+        messaging_product: "whatsapp".to_string(),
+        recipient_type: "individual".to_string(),
+        to: "1234567890".to_string(),
+        r#type: MType::template,
+        template: TemplateContent {
+            name: "otp_verification".to_string(),
+            language: Language {
+                code: "en".to_string(),
+            },
+            components: vec![
+                // Body component with text parameter
+                Component {
+                    r#type: "body".to_string(),
+                    parameters: Some(vec![Parameter::Text(TextParameter {
+                        r#type: "text".to_string(),
+                        text: "123456".to_string(),
+                    })]),
+                    sub_type: None,
+                    index: None,
+                },
+                // Button component with URL type
+                Component {
+                    r#type: "button".to_string(),
+                    parameters: Some(vec![Parameter::Text(TextParameter {
+                        r#type: "text".to_string(),
+                        text: "123456".to_string(),
+                    })]),
+                    sub_type: Some("url".to_string()),
+                    index: Some("0".to_string()),
+                },
+            ],
+        },
+    };
+
+    let response = config.outgoing(MessageType::Template(message)).await?;
+    println!("Template message sent: {:?}", response);
     
     Ok(())
 }
@@ -342,6 +407,7 @@ export WHATSAPP_ACCESS_TOKEN="your_access_token"
 
 - ✅ Send text messages
 - ✅ Send interactive list messages
+- ✅ Send template messages (OTP, notifications)
 - ✅ Process incoming messages
 - ✅ Handle message status updates
 - ✅ Async/await support

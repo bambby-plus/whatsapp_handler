@@ -243,4 +243,65 @@ mod tests {
         .await;
         println!("Outgoing interaction message: {:?}", response)
     }
+
+    #[tokio::test]
+    #[ignore] // remove ignore incase you want to test
+    async fn outgoing_template_otp_verification() {
+        use formatter::outgoing_type::MessageType;
+        use formatter::outgoing_type::template::{
+            Component, Language, MType, Parameter, Template, TemplateContent, TextParameter,
+        };
+
+        let whatsapp_base_url = String::from("https://graph.facebook.com");
+        let whatsapp_version = String::from("v22.0");
+        let whatsapp_business_id = String::from("");
+        let whatsapp_phone_number_id = String::from("");
+        let whatsapp_system_user_token = String::from("");
+
+        let message = Template {
+            messaging_product: "whatsapp".to_string(),
+            recipient_type: "individual".to_string(),
+            to: "2349066332543".to_string(),
+            r#type: MType::template,
+            template: TemplateContent {
+                name: "otp_verification_2".to_string(),
+                language: Language {
+                    code: "en".to_string(),
+                },
+                components: vec![
+                    // Body component with text parameter
+                    Component {
+                        r#type: "body".to_string(),
+                        parameters: Some(vec![Parameter::Text(TextParameter {
+                            r#type: "text".to_string(),
+                            text: "12345".to_string(),
+                        })]),
+                        sub_type: None,
+                        index: None,
+                    },
+                    // Button component with URL type
+                    Component {
+                        r#type: "button".to_string(),
+                        parameters: Some(vec![Parameter::Text(TextParameter {
+                            r#type: "text".to_string(),
+                            text: "12345".to_string(),
+                        })]),
+                        sub_type: Some("url".to_string()),
+                        index: Some("0".to_string()),
+                    },
+                ],
+            },
+        };
+
+        let response = config::Config::from(
+            whatsapp_base_url,
+            whatsapp_version,
+            whatsapp_business_id,
+            whatsapp_phone_number_id,
+            whatsapp_system_user_token,
+        )
+        .outgoing(MessageType::Template(message))
+        .await;
+        println!("Outgoing template message: {:?}", response)
+    }
 }

@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// This enum is tagged to support various structured message types
 /// such as interactive buttons, lists, media (sticker, video, audio, document, image),
-/// and plain text.
+/// template messages, and plain text.
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(untagged)]
 pub enum MessageType {
@@ -16,6 +16,7 @@ pub enum MessageType {
     Document(document::Document),
     Image(image::Image),
     Text(text::Text),
+    Template(template::Template),
 }
 
 /// Module for interactive button messages.
@@ -323,5 +324,149 @@ pub mod text {
     #[allow(non_camel_case_types)]
     pub enum MType {
         text,
+    }
+}
+
+/// Module for WhatsApp Business Template messages.
+pub mod template {
+    
+    use serde::{Deserialize, Serialize};
+
+    /// Top-level structure for a template message.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct Template {
+        pub messaging_product: String,
+        pub recipient_type: String,
+        pub to: String,
+        #[serde(rename = "type")]
+        pub r#type: MType,
+        pub template: TemplateContent,
+    }
+
+    /// Content of the template including name, language, and components.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct TemplateContent {
+        pub name: String,
+        pub language: Language,
+        pub components: Vec<Component>,
+    }
+
+    /// Language configuration for the template.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct Language {
+        pub code: String,
+    }
+
+    /// Components of the template (header, body, footer, button).
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct Component {
+        #[serde(rename = "type")]
+        pub r#type: String,
+        pub parameters: Option<Vec<Parameter>>,
+        pub sub_type: Option<String>,
+        pub index: Option<String>,
+    }
+
+    /// Parameters within a component (text, currency, date_time, image, etc.).
+    #[derive(Serialize, Deserialize, Debug)]
+    #[serde(untagged)]
+    pub enum Parameter {
+        Text(TextParameter),
+        Currency(CurrencyParameter),
+        DateTime(DateTimeParameter),
+        Image(ImageParameter),
+        Document(DocumentParameter),
+        Video(VideoParameter),
+        Payload(PayloadParameter),
+    }
+
+    /// Text parameter for body components.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct TextParameter {
+        #[serde(rename = "type")]
+        pub r#type: String,
+        pub text: String,
+    }
+
+    /// Currency parameter for body components.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct CurrencyParameter {
+        #[serde(rename = "type")]
+        pub r#type: String,
+        pub currency: CurrencyDetail,
+    }
+
+    /// Currency details.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct CurrencyDetail {
+        pub fallback_value: String,
+        pub code: String,
+        pub amount_1000: u64,
+    }
+
+    /// DateTime parameter for body components.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct DateTimeParameter {
+        #[serde(rename = "type")]
+        pub r#type: String,
+        pub date_time: DateTimeDetail,
+    }
+
+    /// DateTime details.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct DateTimeDetail {
+        pub fallback_value: String,
+        pub day_of_week: u8,
+        pub year: u16,
+        pub month: u8,
+        pub day_of_month: u8,
+        pub hour: u8,
+        pub minute: u8,
+        pub calendar: String,
+    }
+
+    /// Image parameter for header components.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct ImageParameter {
+        #[serde(rename = "type")]
+        pub r#type: String,
+        pub image: MediaLink,
+    }
+
+    /// Document parameter for header components.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct DocumentParameter {
+        #[serde(rename = "type")]
+        pub r#type: String,
+        pub document: MediaLink,
+    }
+
+    /// Video parameter for header components.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct VideoParameter {
+        #[serde(rename = "type")]
+        pub r#type: String,
+        pub video: MediaLink,
+    }
+
+    /// Media link details.
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct MediaLink {
+        pub link: String,
+    }
+
+    /// Payload parameter for button components (quick_reply).
+    #[derive(Serialize, Deserialize, Debug)]
+    pub struct PayloadParameter {
+        #[serde(rename = "type")]
+        pub r#type: String,
+        pub payload: String,
+    }
+
+    /// Enum type for the message, e.g., "template".
+    #[derive(Serialize, Deserialize, Debug)]
+    #[allow(non_camel_case_types)]
+    pub enum MType {
+        template,
     }
 }
